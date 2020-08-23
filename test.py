@@ -2,7 +2,7 @@
 
 import discord
 
-TOKEN = 'NzQ2NjY0NjM1Nzc5OTA3NjUy.X0DnoQ.KK6Gkb3dIor-M9ikmSkg_6Wf9So'
+TOKEN = 'NzQ2NjY0NjM1Nzc5OTA3NjUy.X0DnoQ.Awf9zil2s1KERTrQLcsaMWh9ldg'
 
 # 接続に必要なオブジェクトを生成
 client = discord.Client()
