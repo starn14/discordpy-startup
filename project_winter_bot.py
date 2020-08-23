@@ -67,16 +67,29 @@ async def on_raw_reaction_add(payload):
     # 重複削除
     user_list = list(set(user_list))
             
-    min_persons = 6 - len(user_list)
-    max_persons = 8 - len(user_list)
-    await channel.send('現在の参加者は%s人です\n@%s-%s' % (str(len(user_list)), min_persons, max_persons))
+    if len(user_list) <= 5:
+        min_persons = 6 - len(user_list)
+        max_persons = 8 - len(user_list)
+        await channel.send('現在の参加者は%s人です\n@%s-%s' % (str(len(user_list)), min_persons, max_persons))
+    elif len(user_list) >= 6 and len(user_list) <= 7:
+        max_persons = 8 - len(user_list)
+        await channel.send('現在の参加者は%s人です\n@%s人まで参加可能です' % (str(len(user_list)), max_persons))
+    elif len(user_list) == 8:
+        await channel.send('現在の参加者は%s人です\n8人揃ってます!' % (str(len(user_list))))
+    elif len(user_list) >= 9:
+        amari_persons = 9 - len(user_list)
+        await channel.send('現在の参加者は%s人です\n申し訳ありませんが、%s人観戦となります' % (str(len(user_list)), amari_persons))
 
 async def list_participants(channel):
     """現在の参加者の一覧を表示"""
 
     # 最新の募集メッセージのmessageオブジェクトを取得
     global recruitment_message_id
-    message = await channel.fetch_message(recruitment_message_id)
+    try:
+        message = await channel.fetch_message(recruitment_message_id)
+    except discord.errors.NotFound:
+        await channel.send('募集メッセージが見つかりません')
+        return
 
     user_list = []
     # メッセージについているリアクションを取得
@@ -94,9 +107,9 @@ async def list_participants(channel):
         await channel.send('現在の参加者は0人です')
         return
 
-    await channel.send('現在の参加者は%s人です' % str(len(user_list)))
-    for user in user_list:
-        await channel.send(user)
+    msg = '現在の参加者は%s人です\n' % str(len(user_list))
+    msg += '\n'.join(user_list)
+    await channel.send(msg)
 
 async def appear_number(channel):
     """現在の参加人数を表示する"""
@@ -104,7 +117,11 @@ async def appear_number(channel):
     global recruitment_message_id
         
     # 最新の募集メッセージのmessageオブジェクトを取得
-    message = await channel.fetch_message(recruitment_message_id)
+    try:
+        message = await channel.fetch_message(recruitment_message_id)
+    except discord.errors.NotFound:
+        await channel.send('募集メッセージが見つかりません')
+        return
 
     user_list = []
     # メッセージについているリアクションを取得
@@ -125,11 +142,11 @@ async def appear_number(channel):
 async def recruitment_participants(channel, start_hour=None, end_hour=None):
     """募集をかける"""
     if (not start_hour) and (not end_hour):
-        await channel.send('@here\nProjectWinter対戦募集します\n6人～8人集まれば開催します')
+        await channel.send('@here\nProjectWinter対戦募集します\n6人～8人集まれば開催します\n参加する方はこのメッセージにリアクションをつけてください')
     elif start_hour and (not end_hour):
-        await channel.send('@here\nProjectWinter対戦募集します\n%s時頃に6人～8人集まれば開催します' % start_hour)
+        await channel.send('@here\nProjectWinter対戦募集します\n%s時頃に6人～8人集まれば開催します\n参加する方はこのメッセージにリアクションをつけてください' % start_hour)
     else:
-        await channel.send('@here\nProjectWinter対戦募集します\n%s時～%s時頃に6人～8人集まれば開催します' % (start_hour, end_hour))
+        await channel.send('@here\nProjectWinter対戦募集します\n%s時～%s時頃に6人～8人集まれば開催します\n参加する方はこのメッセージにリアクションをつけてください' % (start_hour, end_hour))
 
     # 募集メッセージのIDを記録
     # このメッセージについたリアクションで参加者を判断する
