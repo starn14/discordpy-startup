@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import discord
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
