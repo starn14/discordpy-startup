@@ -22,6 +22,9 @@ async def on_message(message):
         return
     if ':raised_hand:' in message.content:
         await message.channel.send('hogehuga')
+    # 「/neko」と発言したら「にゃーん」が返る処理
+    if message.content == '/neko':
+        await message.channel.send('にゃーん')
 
 # Botの起動とDiscordサーバーへの接続
 client.run(TOKEN)
