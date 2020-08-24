@@ -81,6 +81,13 @@ async def on_raw_reaction_add(payload):
         
     # channel_id から Channel オブジェクトを取得
     channel = client.get_channel(payload.channel_id)
+
+    # 過去のメッセージを遡って募集メッセージを探す
+    message = await get_last_recruitment_message(channel)
+    if payload.message_id != message.id:
+        # 募集メッセージについたリアクションでなければ返す
+        return
+        
     # リアクションのついた募集メッセージのmessageオブジェクトを取得
     message = await channel.fetch_message(payload.message_id)
 
