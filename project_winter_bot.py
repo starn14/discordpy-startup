@@ -7,7 +7,7 @@ import random
 import discord
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
-os.environ['PW_BOT_MSG_ID'] = 0
+os.environ['PW_BOT_MSG_ID'] = '0'
 
 # 接続に必要なオブジェクトを生成
 client = discord.Client()
@@ -45,46 +45,49 @@ async def on_message(message):
         else:
             await recruitment_participants(message.channel)
         return
-    if message.content.startswith('@雪山bot'):
-        await reply(message.channel)
+    if client.user in message.mentions:
+        await reply(message.channel, message.author)
         return
 
-async def reply(channel):
+async def reply(channel, author):
     """@で話しかけられた時の応答"""
     rand = random.randrange(10)
     if rand == 0:
-        await channel.send(u'うるせえ話しかけんな（情緒不安定）')
+        msg = u'うるせえ話しかけんな（情緒不安定）'
     elif rand == 1:
-        await channel.send(u'こんにちは')
+        msg = u'こんにちは'
     elif rand == 2:
-        await channel.send(u'雪山人集まるかなぁ...')
+        msg = u'雪山人集まるかなぁ...'
     elif rand == 3:
-        await channel.send(u'ホットパイが食べたくなってきました')
+        msg = u'ホットパイが食べたくなってきました'
     elif rand == 4:
-        await channel.send(u'近接武器はやっぱり鎌ですよね')
+        msg = u'近接武器はやっぱり鎌ですよね'
     elif rand == 5:
-        await channel.send(u'近接武器はやっぱりピッケルですよね')
+        msg = u'近接武器はやっぱりピッケルですよね'
     elif rand == 6:
-        await channel.send(u'近接武器はやっぱり斧ですよね')
+        msg = u'近接武器はやっぱり斧ですよね'
     elif rand == 7:
-        await channel.send(u'今日の通信機のラッキーカラーは黄色！')
+        msg = u'今日の通信機のラッキーカラーは黄色！'
     elif rand == 8:
-        await channel.send(u'今日の通信機のラッキーカラーは青色！')
+        msg = u'今日の通信機のラッキーカラーは青色！'
     elif rand == 9:
-        await channel.send(u'今日の通信機のラッキーカラーは赤色！ シーッ！')
+        msg = u'今日の通信機のラッキーカラーは赤色！ シーッ！'
+
+    reply = f'{author.mention} %s' % msg
+    await channel.send(reply)
 
 @client.event
 async def on_raw_reaction_add(payload):
     """メッセージにリアクションがつくと呼ばれる"""
 
-    if os.environ['PW_BOT_MSG_ID'] != payload.message_id:
+    if int(os.environ['PW_BOT_MSG_ID']) != payload.message_id:
         # 最新の募集メッセージについたリアクションでなければ返す
         return
         
     # channel_id から Channel オブジェクトを取得
     channel = client.get_channel(payload.channel_id)
     # 最新の募集メッセージのmessageオブジェクトを取得
-    message = await channel.fetch_message(os.environ['PW_BOT_MSG_ID'])
+    message = await channel.fetch_message(int(os.environ['PW_BOT_MSG_ID']))
 
     user_list = []
     # メッセージについているリアクションを取得
@@ -116,7 +119,7 @@ async def list_participants(channel):
 
     # 最新の募集メッセージのmessageオブジェクトを取得
     try:
-        message = await channel.fetch_message(os.environ['PW_BOT_MSG_ID'])
+        message = await channel.fetch_message(int(os.environ['PW_BOT_MSG_ID']))
     except discord.errors.NotFound:
         await channel.send('募集メッセージが見つかりません')
         return
@@ -146,7 +149,7 @@ async def appear_number(channel):
 
     # 最新の募集メッセージのmessageオブジェクトを取得
     try:
-        message = await channel.fetch_message(os.environ['PW_BOT_MSG_ID'])
+        message = await channel.fetch_message(int(os.environ['PW_BOT_MSG_ID']))
     except discord.errors.NotFound:
         await channel.send('募集メッセージが見つかりません')
         return
@@ -178,7 +181,7 @@ async def recruitment_participants(channel, start_hour=None, end_hour=None):
 
     # 募集メッセージのIDを記録
     # このメッセージについたリアクションで参加者を判断する
-    os.environ['PW_BOT_MSG_ID'] = channel.last_message_id
+    os.environ['PW_BOT_MSG_ID'] = str(channel.last_message_id)
 
 # Botの起動とDiscordサーバーへの接続
 client.run(TOKEN)
