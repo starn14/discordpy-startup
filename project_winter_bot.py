@@ -2,10 +2,12 @@
 
 import os
 import re
+import random
+
 import discord
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
-recruitment_message_id = 0
+os.environ['PW_BOT_MSG_ID'] = 0
 
 # 接続に必要なオブジェクトを生成
 client = discord.Client()
@@ -26,8 +28,10 @@ async def on_message(message):
         return
     if message.content == '/一覧':
         await list_participants(message.channel)
+        return
     if message.content == '/人数':
         await appear_number(message.channel)
+        return
     if message.content.startswith('/募集'):
         match1 = re.match(r'^/募集(\D*)(?P<start_hour>[0-9]{1,2})(\D*)$', message.content)
         match2 = re.match(r'^/募集(\D*)(?P<start_hour>[0-9]{1,2})-(?P<end_hour>[0-9]{1,2})(\D*)$', message.content)
@@ -40,20 +44,47 @@ async def on_message(message):
             await recruitment_participants(message.channel, start_hour=start_hour, end_hour=end_hour)
         else:
             await recruitment_participants(message.channel)
+        return
+    if message.content.startswith('@雪山bot'):
+        await reply(message.channel)
+        return
+
+async def reply(channel):
+    """@で話しかけられた時の応答"""
+    rand = random.randrange(10)
+    if rand == 0:
+        await channel.send(u'うるせえ話しかけんな（情緒不安定）')
+    elif rand == 1:
+        await channel.send(u'こんにちは')
+    elif rand == 2:
+        await channel.send(u'雪山人集まるかなぁ...')
+    elif rand == 3:
+        await channel.send(u'ホットパイが食べたくなってきました')
+    elif rand == 4:
+        await channel.send(u'近接武器はやっぱり鎌ですよね')
+    elif rand == 5:
+        await channel.send(u'近接武器はやっぱりピッケルですよね')
+    elif rand == 6:
+        await channel.send(u'近接武器はやっぱり斧ですよね')
+    elif rand == 7:
+        await channel.send(u'今日の通信機のラッキーカラーは黄色！')
+    elif rand == 8:
+        await channel.send(u'今日の通信機のラッキーカラーは青色！')
+    elif rand == 9:
+        await channel.send(u'今日の通信機のラッキーカラーは赤色！ シーッ！')
 
 @client.event
 async def on_raw_reaction_add(payload):
     """メッセージにリアクションがつくと呼ばれる"""
 
-    global recruitment_message_id
-    if recruitment_message_id != payload.message_id:
+    if os.environ['PW_BOT_MSG_ID'] != payload.message_id:
         # 最新の募集メッセージについたリアクションでなければ返す
         return
         
     # channel_id から Channel オブジェクトを取得
     channel = client.get_channel(payload.channel_id)
     # 最新の募集メッセージのmessageオブジェクトを取得
-    message = await channel.fetch_message(recruitment_message_id)
+    message = await channel.fetch_message(os.environ['PW_BOT_MSG_ID'])
 
     user_list = []
     # メッセージについているリアクションを取得
@@ -73,7 +104,7 @@ async def on_raw_reaction_add(payload):
         await channel.send('現在の参加者は%s人です\n@%s-%s' % (str(len(user_list)), min_persons, max_persons))
     elif len(user_list) >= 6 and len(user_list) <= 7:
         max_persons = 8 - len(user_list)
-        await channel.send('現在の参加者は%s人です\n@%s人まで参加可能です' % (str(len(user_list)), max_persons))
+        await channel.send('現在の参加者は%s人です\nゲーム開始できます! なお、@%s人まで参加可能です' % (str(len(user_list)), max_persons))
     elif len(user_list) == 8:
         await channel.send('現在の参加者は%s人です\n8人揃ってます!' % (str(len(user_list))))
     elif len(user_list) >= 9:
@@ -84,9 +115,8 @@ async def list_participants(channel):
     """現在の参加者の一覧を表示"""
 
     # 最新の募集メッセージのmessageオブジェクトを取得
-    global recruitment_message_id
     try:
-        message = await channel.fetch_message(recruitment_message_id)
+        message = await channel.fetch_message(os.environ['PW_BOT_MSG_ID'])
     except discord.errors.NotFound:
         await channel.send('募集メッセージが見つかりません')
         return
@@ -114,11 +144,9 @@ async def list_participants(channel):
 async def appear_number(channel):
     """現在の参加人数を表示する"""
 
-    global recruitment_message_id
-        
     # 最新の募集メッセージのmessageオブジェクトを取得
     try:
-        message = await channel.fetch_message(recruitment_message_id)
+        message = await channel.fetch_message(os.environ['PW_BOT_MSG_ID'])
     except discord.errors.NotFound:
         await channel.send('募集メッセージが見つかりません')
         return
@@ -150,8 +178,7 @@ async def recruitment_participants(channel, start_hour=None, end_hour=None):
 
     # 募集メッセージのIDを記録
     # このメッセージについたリアクションで参加者を判断する
-    global recruitment_message_id
-    recruitment_message_id = channel.last_message_id
+    os.environ['PW_BOT_MSG_ID'] = channel.last_message_id
 
 # Botの起動とDiscordサーバーへの接続
 client.run(TOKEN)
