@@ -50,7 +50,8 @@ async def on_message(message):
 
 async def reply(channel, author):
     """@で話しかけられた時の応答"""
-    rand = random.randrange(10)
+    rand = random.randrange(40)
+
     if rand == 0:
         msg = u'うるせえ話しかけんな（情緒不安定）'
     elif rand == 1:
@@ -71,6 +72,66 @@ async def reply(channel, author):
         msg = u'今日の通信機のラッキーカラーは青色！'
     elif rand == 9:
         msg = u'今日の通信機のラッキーカラーは赤色！ シーッ！'
+    elif rand == 10:
+        msg = u'えー！私人狼じゃないですよぉ！'
+    elif rand == 11:
+        msg = u'今日の第一修理目標の素材は...歯車%s/基盤%s/燃料%s' % (str(random.randrange(6, 16)), str(random.randrange(6, 16)), str(random.randrange(6, 16)))
+    elif rand == 12:
+        msg = u'今日の第一修理目標は...発掘！ さあスコップを持って！'
+    elif rand == 13:
+        msg = u'今日の第一修理目標は...暗号！ ...117？'
+    elif rand == 14:
+        msg = u'今日の第二修理目標の素材は...歯車%s/基盤%s/燃料%s' % (str(random.randrange(6, 16)), str(random.randrange(6, 16)), str(random.randrange(6, 16)))
+    elif rand == 15:
+        msg = u'今日の第二修理目標は...アニマルラッシュ！ シロクマに気を付けてね！'
+    elif rand == 16:
+        msg = u'今日の第二修理目標は...運搬！'
+    elif rand == 17:
+        msg = u'ブロニキ～～～～？？？？？？'
+    elif rand == 18:
+        msg = u'今日のBLACKOUTラッキーアイテムは...ロザリオ！'
+    elif rand == 19:
+        msg = u'今日のBLACKOUTラッキーアイテムは...松明！'
+    elif rand == 20:
+        msg = u'今日のBLACKOUTラッキーアイテムは...聖書！'
+    elif rand == 21:
+        msg = u'あなたをロールに例えると...イノセントかな！ 何の特徴もないんだね！'
+    elif rand == 22:
+        msg = u'あなたをロールに例えると...サイエンティストかな！ 頭良さそうに見えて大して役に立たない人？'
+    elif rand == 23:
+        msg = u'あなたをロールに例えると...ハッカーかな！ ぼっちでも安心！'
+    elif rand == 24:
+        msg = u'あなたをロールに例えると...ソルジャーかな！ 頼りになる～！'
+    elif rand == 25:
+        msg = u'あなたをロールに例えると...ディフェクターかな！ どっちつかずって感じのあなたにピッタリ！'
+    elif rand == 26:
+        msg = u'あなたをロールに例えると...メディックかな！ 癒し系に見えていざという時まで何もしない人？'
+    elif rand == 27:
+        msg = u'あなたをロールに例えると...ディテクティブかな！ かゆいところに手が届かない人ってよく言われない？'
+    elif rand == 28:
+        msg = u'あなたをロールに例えると...ハンターかな！ 頑固すぎて周りから浮いちゃうこと、ない？？'
+    elif rand == 29:
+        msg = u'あなたをロールに例えると...パードレかな！ 他力本願って楽でいいよね～'
+    elif rand == 30:
+        msg = u'あなたをロールに例えると...デーモンかな！ 強そうな名前だけど実は孤独な人なんだね...'
+    elif rand == 31:
+        msg = u'あなたをロールに例えると...ウィスパラーかな！ 周囲からは挙動不審な人だと思われてるよ！'
+    elif rand == 32:
+        msg = u'あなたをロールに例えると...イエティかな！ 性格悪いって言われない？'
+    elif rand == 33:
+        msg = u'あなたをロールに例えると...アイデンティティシーフかな！ 一つ分の陽だまりに二つはちょっと入れないんだよね'
+    elif rand == 34:
+        msg = u'あなたをロールに例えると...ヒマンチュかな！ ...あっすません、すません...'
+    elif rand == 35:
+        msg = u'今日のラッキーイベントは...ブリザード！ 引きこもる理由にはうってつけだね！'
+    elif rand == 36:
+        msg = u'今日のラッキーイベントは...ウサギ！ リアル狂人達の独壇場だ！'
+    elif rand == 37:
+        msg = u'今日のラッキーイベントは...ソーラーフレア！ ...あっ看板回しとこ...'
+    elif rand == 38:
+        msg = u'今日のラッキーイベントは...支援物資投下！ 取れると思った？？残念、罠でした！'
+    elif rand == 39:
+        msg = u'今日のラッキーイベントは...脱出ポッド！ 誰しも自分の身が一番大事！'
 
     reply = f'{author.mention} %s' % msg
     await channel.send(reply)
@@ -121,6 +182,9 @@ async def list_participants(channel):
 
     # 過去のメッセージを遡って募集メッセージを探す
     message = await get_last_recruitment_message(channel)
+    if not message:
+        await channel.send('過去の募集メッセージが見つかりません')
+        return
 
     user_list = []
     # メッセージについているリアクションを取得
@@ -147,6 +211,9 @@ async def appear_number(channel):
 
     # 過去のメッセージを遡って募集メッセージを探す
     message = await get_last_recruitment_message(channel)
+    if not message:
+        await channel.send('過去の募集メッセージが見つかりません')
+        return
 
     user_list = []
     # メッセージについているリアクションを取得
