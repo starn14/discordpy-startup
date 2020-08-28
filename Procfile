@@ -1,1 +1,1 @@
-discordbot: python project_winter_bot.py
+discordbot: python bot_script.py
