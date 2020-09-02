@@ -264,8 +264,17 @@ class KuromakuBot(discord.Client):
         # メッセージ送信者がBotだった場合は無視する
         if message.author.bot:
             return
-        if self.user in message.mentions:
+        elif self.user in message.mentions:
             await self.reply(message.channel, message.author)
+            return
+        elif 'くろまく' in message.content:
+            await self.worship(message.channel)
+            return
+        elif 'あいきん' in message.content:
+            await message.channel.send('あいきんって誰？どちらさん？')
+            return
+        elif 'アイキン' in message.content:
+            await message.channel.send('アイキンって誰？どちらさん？')
             return
 
     async def reply(self, channel, author):
@@ -307,7 +316,7 @@ class KuromakuBot(discord.Client):
                 u'アイギス': u'R18版はまたいつかね',
                 u'ポケモン': u'くろまくさんは存在が6V',
                 u'TFT': u'4ヴァンガード4ミスティック1アイキン',
-                u'遊戯王': u'三幻神を片手でねじ伏せた男',
+                u'遊戯王': u'このカードが召喚に成功したとき、\n相手プレイヤーに8000Pのダメージを与える',
                 u'アイワナ': u'I wanna be the Kuromaku.',
                 u'Dさん配信閲覧': u'だからくろまくさんがいたのかぁ',
                 u'株': u'くろまく配信の株買わせてください',
@@ -387,7 +396,7 @@ class KuromakuBot(discord.Client):
         msg_title = list(msg_dict.keys())[rand]
         msg = msg_dict[msg_title]
 
-        reply = '\n[%s] %sくろまく\n%s\n%s' % (rank, msg_title, star, msg)
+        reply = '\n%s\n[%s] %sくろまく\n\n%s' % (star, rank, msg_title, msg)
 
         gomi_value = random.randrange(100)
         is_gomi = (gomi_value >= 95)
@@ -400,6 +409,18 @@ class KuromakuBot(discord.Client):
         elif rank == 'SSR':
             await self.call_ssr_msg(author.mention, channel, reply, is_gomi)
     
+    async def worship(self, channel):
+        """くろまくさんを崇拝する"""
+        worship_list = [
+            '神', '天才', '正義', '羅将', '英雄', 'ヒーロー', '王', '皇帝', '伝説',
+            '素晴らしい', '美しい', 'すごい', '神々しい', 
+            'イケボ', 'イケメン', 'プロゲーマー',
+        ]
+        rand = random.randrange(len(worship_list))
+        worship_word = worship_list[rand]
+        msg = 'くろまくさんは%s' % worship_word
+        await channel.send(msg)
+
     async def call_gomi_msg(self, mention_author, channel, message):
         frame_str = await self._get_frame_str('Gomi')
         msg = '%s\n%s%s\n%s' % (mention_author, frame_str, u'\n----------------------------------------------------', frame_str)
@@ -407,7 +428,7 @@ class KuromakuBot(discord.Client):
 
         await asyncio.sleep(1)
 
-        reply = '\n[%s] %s\n%s\n%s' % ('Gomi', 'ごみりん', '★☆☆☆☆☆', '残念！ごみりんが出ちゃった！')
+        reply = '\n%s\n[%s] %s\n\n%s' % ('★☆☆☆☆☆', 'Gomi', 'ごみりん', '残念！ごみりんが出ちゃった！')
         new_msg = '%s\n%s%s\n%s' % (mention_author, frame_str, reply, frame_str)
         await message.edit(content=new_msg)
 
