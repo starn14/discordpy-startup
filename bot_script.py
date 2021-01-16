@@ -9,7 +9,7 @@ from collections import namedtuple
 from discord.ext import commands
 import discord
 
-ADMIN_USER_ID = os.environ['DISCORD_BOT_ADMIN_USER_ID']
+ADMIN_USER_ID = '358579613670309888'
 
 TOKEN_PW = os.environ['DISCORD_BOT_TOKEN_PW']
 TOKEN_KUROMAKU = os.environ['DISCORD_BOT_TOKEN_KUROMAKU']
