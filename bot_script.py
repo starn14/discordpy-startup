@@ -1062,12 +1062,7 @@ class ChogathBot(discord.Client):
 
         await asyncio.sleep(10)
 
-        self.wait_play_end(guild, voice_client)
-
-    async def wait_play_end(self, guild, voice_client):
-        while voice_client.is_playing():
-            pass
-        await self.leave_voice_channel(guild)
+        self.leave_voice_channel(guild)
 
 
 Entry = namedtuple('Entry', 'client event token')  
