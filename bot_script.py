@@ -994,7 +994,7 @@ class ChogathBot(discord.Client):
     async def on_ready(self):
         """起動時に呼ばれる"""
         # 起動したらターミナルにログイン通知が表示される
-        print('Hello World')
+        print('闇が怖いか？')
 
     async def on_message(self, message):
 
