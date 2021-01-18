@@ -1057,7 +1057,6 @@ class ChogathBot(discord.Client):
 
         files = os.listdir(dir_)
         file_name = files[random.randrange(len(files))]
-        file_name = 'test.mp3'
 
         ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
         voice_client.play(ffmpeg_audio_source, after=end_func)
