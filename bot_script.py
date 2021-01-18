@@ -1012,11 +1012,9 @@ class ChogathBot(discord.Client):
                 # それ以外の@メッセージ
                 if message.guild.voice_client:
                     # 既にボイスチャンネルにいる
-                    print('hoge')
                     return
                 await self.join_voice_channel(message.author)
-                end_func = await self.leave_voice_channel(message.guild)
-                await self.speak_chogath(message.guild, end_func)
+                await self.speak_chogath(message.guild)
             return
 
     async def join_voice_channel(self, author):
@@ -1038,10 +1036,10 @@ class ChogathBot(discord.Client):
 
         await voice_client.disconnect()
 
-    async def speak_chogath(self, guild, end_func):
-        await self.play(guild, end_func)
+    async def speak_chogath(self, guild):
+        await self.play(guild)
 
-    async def play(self, guild, end_func):
+    async def play(self, guild):
         """指定された音声ファイルを流します。"""
         voice_client = guild.voice_client
 
@@ -1059,7 +1057,7 @@ class ChogathBot(discord.Client):
         file_name = files[random.randrange(len(files))]
 
         ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
-        voice_client.play(ffmpeg_audio_source, after=end_func)
+        voice_client.play(ffmpeg_audio_source, after=await self.leave_voice_channel(guild))
 
 
 Entry = namedtuple('Entry', 'client event token')  
