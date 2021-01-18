@@ -1058,8 +1058,11 @@ class ChogathBot(discord.Client):
         file_name = files[random.randrange(len(files))]
 
         ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
-        func = partial(await self.wait_play_end, guild, voice_client)
-        voice_client.play(ffmpeg_audio_source, after=func)
+        voice_client.play(ffmpeg_audio_source, after)
+
+        await asyncio.sleep(10)
+
+        self.wait_play_end(guild, voice_client)
 
     async def wait_play_end(self, guild, voice_client):
         while voice_client.is_playing():
