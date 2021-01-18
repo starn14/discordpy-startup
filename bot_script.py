@@ -994,7 +994,7 @@ class ChogathBot(discord.Client):
     async def on_ready(self):
         """起動時に呼ばれる"""
         # 起動したらターミナルにログイン通知が表示される
-        print('闇が怖いか？')
+        print('南無南無南無...')
 
     async def on_message(self, message):
 
@@ -1010,8 +1010,13 @@ class ChogathBot(discord.Client):
                 await self.logout()
             else:
                 # それ以外の@メッセージ
+                if message.guild.voice_client:
+                    # 既にボイスチャンネルにいる
+                    print('hoge')
+                    return
                 await self.join_voice_channel(message.author)
                 await self.speak_chogath(message.guild)
+                await self.leave_voice_channel(message.guild)
             return
 
     async def join_voice_channel(self, author):
@@ -1024,6 +1029,15 @@ class ChogathBot(discord.Client):
 
         await voice_state.channel.connect()
 
+    async def leave_voice_channel(self, guild):
+        """Botをボイスチャンネルから切断させる"""
+        voice_client = guild.voice_client
+
+        if not voice_client:
+            return
+
+        await voice_client.disconnect()
+
     async def speak_chogath(self, guild):
         await self.play(guild)
 
@@ -1031,7 +1045,20 @@ class ChogathBot(discord.Client):
         """指定された音声ファイルを流します。"""
         voice_client = guild.voice_client
 
-        ffmpeg_audio_source = discord.FFmpegPCMAudio('./sound/chogath/button01b.mp3')
+        rank_value = random.randrange(100)
+
+        # 5%でmalphiteになる
+        is_malphite = rank_value >= 95
+
+        if is_malphite:
+            dir_ = './sound/malphite/'
+        else:
+            dir_ = './sound/chogath/'
+
+        files = os.listdir(dir_)
+        file_name = files[random.randrange(len(files))]
+
+        ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
         voice_client.play(ffmpeg_audio_source)
 
 
