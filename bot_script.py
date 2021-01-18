@@ -1058,7 +1058,7 @@ class ChogathBot(discord.Client):
         file_name = files[random.randrange(len(files))]
 
         ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
-        voice_client.play(ffmpeg_audio_source, after)
+        voice_client.play(ffmpeg_audio_source)
 
         await asyncio.sleep(10)
 
