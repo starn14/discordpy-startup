@@ -4,7 +4,8 @@ import os
 import re
 import random
 import asyncio  
-from collections import namedtuple  
+from collections import namedtuple
+from functools import partial
 
 from discord.ext import commands
 import discord
@@ -14,7 +15,6 @@ ADMIN_USER_ID = '358579613670309888'
 TOKEN_PW = os.environ['DISCORD_BOT_TOKEN_PW']
 TOKEN_KUROMAKU = os.environ['DISCORD_BOT_TOKEN_KUROMAKU']
 TOKEN_KURUKURU = os.environ['DISCORD_BOT_TOKEN_KURUKURU']
-TOKEN_CHOGATH = os.environ['DISCORD_BOT_TOKEN_CHOGATH']
 
 class ProjectWinterBot(discord.Client):
 
@@ -989,88 +989,11 @@ class KuruKuruBot(discord.Client):
             },
         }
 
-class ChogathBot(discord.Client):
-
-    async def on_ready(self):
-        """起動時に呼ばれる"""
-        # 起動したらターミナルにログイン通知が表示される
-        print('南無南無南無...')
-
-    async def on_message(self, message):
-
-        if message.author.bot:
-            # メッセージ送信者がBotだった場合は無視する
-            return
-        elif self.user in message.mentions:
-            # @メッセージ
-            user_is_admin = int(message.author.id) == int(ADMIN_USER_ID)
-            if user_is_admin and ('/解体' in message.content):
-                # 話しかけたのが管理者で「/解体」が含まれる場合
-                await message.channel.send('討伐完了! 80pt')
-                await self.logout()
-            else:
-                # それ以外の@メッセージ
-                if message.guild.voice_client:
-                    # 既にボイスチャンネルにいる
-                    return
-                await self.join_voice_channel(message.author)
-                await self.speak_chogath(message.guild)
-            return
-
-    async def join_voice_channel(self, author):
-        """Botをボイスチャンネルに入室させる"""
-        voice_state = author.voice
-
-        if (not voice_state) or (not voice_state.channel):
-            # もし送信者がどこのチャンネルにも入っていないなら
-            return
-
-        await voice_state.channel.connect()
-
-    async def leave_voice_channel(self, guild):
-        """Botをボイスチャンネルから切断させる"""
-        voice_client = guild.voice_client
-
-        if not voice_client:
-            return
-
-        await voice_client.disconnect()
-
-    async def speak_chogath(self, guild):
-        await self.play(guild)
-
-    async def play(self, guild):
-        """指定された音声ファイルを流します。"""
-        voice_client = guild.voice_client
-
-        rank_value = random.randrange(100)
-
-        # 5%でmalphiteになる
-        is_malphite = rank_value >= 95
-
-        if is_malphite:
-            dir_ = './sound/malphite/'
-        else:
-            dir_ = './sound/chogath/'
-
-        files = os.listdir(dir_)
-        file_name = files[random.randrange(len(files))]
-
-        def wait_play_end():
-            while voice_client.is_playing():
-                pass
-            await self.leave_voice_channel(guild)
-
-        ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
-        voice_client.play(ffmpeg_audio_source)
-
-
 Entry = namedtuple('Entry', 'client event token')  
 entries = [  
     Entry(client=ProjectWinterBot(), event=asyncio.Event(), token=TOKEN_PW),  
     Entry(client=KuromakuBot(), event=asyncio.Event(), token=TOKEN_KUROMAKU),
-    Entry(client=KuruKuruBot(), event=asyncio.Event(), token=TOKEN_KURUKURU),
-    Entry(client=ChogathBot(), event=asyncio.Event(), token=TOKEN_CHOGATH)
+    Entry(client=KuruKuruBot(), event=asyncio.Event(), token=TOKEN_KURUKURU)
 ]  
 
 async def login():  
