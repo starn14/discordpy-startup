@@ -14,6 +14,7 @@ ADMIN_USER_ID = '358579613670309888'
 TOKEN_PW = os.environ['DISCORD_BOT_TOKEN_PW']
 TOKEN_KUROMAKU = os.environ['DISCORD_BOT_TOKEN_KUROMAKU']
 TOKEN_KURUKURU = os.environ['DISCORD_BOT_TOKEN_KURUKURU']
+TOKEN_CHOGATH = os.environ['DISCORD_BOT_TOKEN_CHOGATH']
 
 class ProjectWinterBot(discord.Client):
 
@@ -791,7 +792,6 @@ class KuruKuruBot(discord.Client):
         if rank <= 3:
             # 通常演出
             is_slot = random.randrange(100) >= 80
-            is_slot = True
             if is_slot:
                 # ぬか喜び演出
                 await message.edit(content='%s\n%s%s\nクルクル...クルクル...来ルカモ！？' % (author, accessory_hatena, ':interrobang:'))
@@ -989,12 +989,58 @@ class KuruKuruBot(discord.Client):
             },
         }
 
+class ChogathBot(discord.Client):
+
+    async def on_ready(self):
+        """起動時に呼ばれる"""
+        # 起動したらターミナルにログイン通知が表示される
+        print('Hello World')
+
+    async def on_message(self, message):
+
+        if message.author.bot:
+            # メッセージ送信者がBotだった場合は無視する
+            return
+        elif self.user in message.mentions:
+            # @メッセージ
+            user_is_admin = int(message.author.id) == int(ADMIN_USER_ID)
+            if user_is_admin and ('/解体' in message.content):
+                # 話しかけたのが管理者で「/解体」が含まれる場合
+                await message.channel.send('討伐完了! 80pt')
+                await self.logout()
+            else:
+                # それ以外の@メッセージ
+                await self.join_voice_channel(message.author)
+                await self.speak_chogath(message.guild)
+            return
+
+    async def join_voice_channel(self, author):
+        """Botをボイスチャンネルに入室させる"""
+        voice_state = author.voice
+
+        if (not voice_state) or (not voice_state.channel):
+            # もし送信者がどこのチャンネルにも入っていないなら
+            return
+
+        await voice_state.channel.connect()
+
+    async def speak_chogath(self, guild):
+        await self.play(guild)
+
+    async def play(self, guild):
+        """指定された音声ファイルを流します。"""
+        voice_client = guild.voice_client
+
+        ffmpeg_audio_source = discord.FFmpegPCMAudio('./sound/chogath/button01b.mp3')
+        voice_client.play(ffmpeg_audio_source)
+
 
 Entry = namedtuple('Entry', 'client event token')  
 entries = [  
     Entry(client=ProjectWinterBot(), event=asyncio.Event(), token=TOKEN_PW),  
     Entry(client=KuromakuBot(), event=asyncio.Event(), token=TOKEN_KUROMAKU),
-    Entry(client=KuruKuruBot(), event=asyncio.Event(), token=TOKEN_KURUKURU)
+    Entry(client=KuruKuruBot(), event=asyncio.Event(), token=TOKEN_KURUKURU),
+    Entry(client=ChogathBot(), event=asyncio.Event(), token=TOKEN_CHOGATH)
 ]  
 
 async def login():  
