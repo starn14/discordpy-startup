@@ -1016,7 +1016,7 @@ class ChogathBot(discord.Client):
                     return
                 await self.join_voice_channel(message.author)
                 await self.speak_chogath(message.guild)
-                await self.leave_voice_channel(message.guild)
+                # await self.leave_voice_channel(message.guild)
             return
 
     async def join_voice_channel(self, author):
