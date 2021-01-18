@@ -1060,9 +1060,7 @@ class ChogathBot(discord.Client):
         ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
         voice_client.play(ffmpeg_audio_source)
 
-        await asyncio.sleep(10)
-
-        self.leave_voice_channel(guild)
+        await self.leave_voice_channel(guild)
 
 
 Entry = namedtuple('Entry', 'client event token')  
