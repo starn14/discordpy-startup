@@ -1056,8 +1056,13 @@ class ChogathBot(discord.Client):
         files = os.listdir(dir_)
         file_name = files[random.randrange(len(files))]
 
+        def wait_play_end():
+            while voice_client.is_playing():
+                pass
+            await self.leave_voice_channel(guild)
+
         ffmpeg_audio_source = discord.FFmpegPCMAudio(dir_ + file_name)
-        voice_client.play(ffmpeg_audio_source)
+        voice_client.play(ffmpeg_audio_source, after=wait_play_end)
 
 
 Entry = namedtuple('Entry', 'client event token')  
