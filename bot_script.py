@@ -1046,20 +1046,20 @@ class ChogathBot(discord.Client):
 
         voice_value = random.randrange(100)
 
-        if voice_value <= 79:
-            # 0 - 79 (80%)
+        if voice_value <= 59:
+            # 0 - 59 (60%)
             dir_ = './sound/chogath/'
-        elif voice_value <= 84:
-            # 80 - 84 (5%)
+        elif voice_value <= 69:
+            # 60 - 69 (10%)
             dir_ = './sound/malphite/'
-        elif voice_value <= 89:
-            # 85 - 89 (5%)
+        elif voice_value <= 79:
+            # 70 - 79 (10%)
             dir_ = './sound/yasuo/'
-        elif voice_value <= 94:
-            # 90 - 94 (5%)
+        elif voice_value <= 89:
+            # 80 - 89 (10%)
             dir_ = './sound/teemo/'
         elif voice_value <= 99:
-            # 95 - 99 (5%)
+            # 90 - 99 (10%)
             dir_ = './sound/zoe/'
 
         files = os.listdir(dir_)
