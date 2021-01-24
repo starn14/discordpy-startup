@@ -1044,15 +1044,23 @@ class ChogathBot(discord.Client):
         """指定された音声ファイルを流します。"""
         voice_client = guild.voice_client
 
-        rank_value = random.randrange(100)
+        voice_value = random.randrange(100)
 
-        # 5%でmalphiteになる
-        is_malphite = rank_value >= 95
-
-        if is_malphite:
-            dir_ = './sound/malphite/'
-        else:
+        if voice_value <= 79:
+            # 0 - 79 (80%)
             dir_ = './sound/chogath/'
+        elif voice_value <= 84:
+            # 80 - 84 (5%)
+            dir_ = './sound/malphite/'
+        elif voice_value <= 89:
+            # 85 - 89 (5%)
+            dir_ = './sound/yasuo/'
+        elif voice_value <= 94:
+            # 90 - 94 (5%)
+            dir_ = './sound/teemo/'
+        elif voice_value <= 99:
+            # 95 - 99 (5%)
+            dir_ = './sound/zoe/'
 
         files = os.listdir(dir_)
         file_name = files[random.randrange(len(files))]
