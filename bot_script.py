@@ -1007,15 +1007,18 @@ class ChogathBot(discord.Client):
             user_is_admin = int(message.author.id) == int(ADMIN_USER_ID)
             if user_is_admin and ('/解体' in message.content):
                 # 話しかけたのが管理者で「/解体」が含まれる場合
-                await message.channel.send('討伐完了! 80pt')
+                await message.channel.send('南無阿弥陀仏')
                 await self.logout()
             else:
                 # それ以外の@メッセージ
                 if message.guild.voice_client:
                     # 既にボイスチャンネルにいる
                     return
-                await self.join_voice_channel(message.author)
-                await self.speak_chogath(message.guild)
+                try:
+                    await self.join_voice_channel(message.author)
+                    await self.speak_chogath(message.guild)
+                except Exception as e:
+                    await message.channel.send(e.message)
             return
 
     async def join_voice_channel(self, author):
