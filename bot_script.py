@@ -725,6 +725,348 @@ class KuruKuruBot(discord.Client):
 
     async def on_message(self, message):
 
+        KURUKURU_CHANNEL_ID = 815949568729677924
+
+        if message.author.bot:
+            # メッセージ送信者がBotだった場合は無視する
+            return
+        elif self.user in message.mentions:
+            # @メッセージ
+            user_is_admin = int(message.author.id) == int(ADMIN_USER_ID)
+            if user_is_admin and ('/解体' in message.content):
+                # 話しかけたのが管理者で「/解体」が含まれる場合
+                await message.channel.send('討伐完了! 80pt')
+                await self.logout()
+            else:
+                # それ以外の@メッセージ
+                if message.channel.id != KURUKURU_CHANNEL_ID:
+                    channel = await self.find_channel(KURUKURU_CHANNEL_ID)
+                    if channel:
+                        await message.channel.send('%s\n僕と会話するときはクルクルbot部屋に書けヤック！' % message.author)
+                        return
+                await self.reply(message.channel, message.author)
+
+    async def find_channel(self, id_):
+        """idのチャンネルを取得
+        
+        Args:
+            id_: チャンネルID
+        Returns:
+            チャンネルオブジェクト
+        """
+        for channel in self.get_all_channels():
+            if id_ == channel.id:
+                return channel
+
+    async def reply(self, channel, author):
+        """@で話しかけられた時の応答"""
+
+        rank_value = random.randrange(100)
+        if rank_value <= 44:
+            # 0 - 44 (45%)
+            rank = 1
+        elif rank_value <= 74:
+            # 45 - 74 (30%)
+            rank = 2
+        elif rank_value <= 89:
+            # 75 - 89 (15%)
+            rank = 3
+        elif rank_value <= 96:
+            # 90 - 96 (7%)
+            rank = 4
+        elif rank_value <= 99:
+            # 97 - 99 (3%)
+            rank = 5
+
+        message = await self._get_message(rank)
+        await self._call_message(author.mention, channel, rank, message)
+
+    async def _get_message(self, rank):
+        """@で話しかけられた時の応答メッセージを返す"""
+
+        accessory_str = await self._get_accessory_str(rank)
+        if not accessory_str:
+            return
+
+        stars = '★' * rank + '☆' * (5-rank)
+
+        item_rank_dict = await self._get_item_rank_dict()
+
+        item_dict = item_rank_dict[rank]
+
+        rand = random.randrange(len(item_dict.keys()))
+        item_name = list(item_dict.keys())[rand]
+        detail = item_dict[item_name]
+
+        return '%s[rare %s]\n%s\n%s\n\n%s' % (accessory_str, str(rank), stars, item_name, detail)
+
+    async def _call_message(self, author, channel, rank, message_str):
+        accessory_hatena = await self._get_accessory_str(-1)
+        accessory = await self._get_accessory_str(rank)
+        message = await channel.send('%s\n%s\nクルクル...' % (author, accessory_hatena))
+        await asyncio.sleep(1)
+        await message.edit(content='%s\n%s\nクルクル...クルクル...' % (author, accessory_hatena))
+        await asyncio.sleep(1)
+
+        if rank <= 3:
+            # 通常演出
+            is_slot = random.randrange(100) >= 80
+            if is_slot:
+                # ぬか喜び演出
+                await message.edit(content='%s\n%s%s\nクルクル...クルクル...来ルカモ！？' % (author, accessory_hatena, ':interrobang:'))
+                message_str = '来ませんｗｗｗｗｗｗｗｗｗｗｗｗｗｗｗｗｗｗｗ\n\n' + message_str
+            else:
+                # 通常演出
+                await message.edit(content='%s\n%s\nクルクル...クルクル...クル？' % (author, accessory))
+        elif rank:
+            # 確変演出
+            is_slot = random.randrange(100) >= 50
+            if is_slot:
+                # 確定slot演出
+                await message.edit(content='%s\n%s%s\nクルクル...クルクル...来ルカモ！？' % (author, accessory_hatena, ':interrobang:'))
+            else:
+                # 確定演出
+                await message.edit(content='%s\n%s\nクルクル...クルクル...クルルッ！？' % (author, accessory))
+
+        message_str =  '%s\n%s' % (author, message_str)
+        await asyncio.sleep(2)
+        await message.edit(content=message_str)
+
+    async def _get_accessory_str(self, rank):
+        if rank == -1:
+            emoji_obj = await self._find_emoji('accessory_hatena')
+        elif rank == 1:
+            emoji_obj = await self._find_emoji('accessory_white')
+        elif rank == 2:
+            emoji_obj = await self._find_emoji('accessory_blue')
+        elif rank == 3:
+            emoji_obj = await self._find_emoji('accessory_orrange')
+        elif rank == 4:
+            emoji_obj = await self._find_emoji('accessory_red')
+        elif rank == 5:
+            emoji_obj = await self._find_emoji('accessory_yellow')
+        return emoji_obj
+
+    async def _find_emoji(self, emoji_name):
+        for emoji in self.emojis:
+            if emoji.name == emoji_name:
+                return emoji
+
+    async def _get_item_rank_dict(self):
+        return {
+            1: {
+                # real
+                '近江牛': '滋賀県名物 日本三大和牛',
+                '信楽焼': '滋賀県名物 よくあるタヌキのアレ',
+                'のっぺいうどん': '滋賀県の郷土料理 かつおと昆布の合わせ出汁にあんかけを絡めたうどん',
+                'じゅんじゅ': '滋賀県の郷土料理 琵琶湖の湖魚をすき焼き風に煮込んだもの',
+                'ひこにゃん': '滋賀県のゆるキャラ 御神体であるチョガスを差し置いて登場した',
+                'ムーディ勝山': '滋賀県出身 右（東京）から来た者を左（大阪）へ受け流す滋賀県はまさに日本の中心',
+                'GACKT': '滋賀県出身 滋賀県以外映す価値なし',
+                'ハローワーク': 'お仕事お探しですか？',
+                'びわ': 'バラ科の常緑高木および食用となるその実',
+                '琵琶': '東アジアの有棹弦楽器の一つ',
+                # LOL
+                'ダガー': 'タワー下のCSにおすすめ',
+                '0/7/0 yasuo': 'ブロンズ帯か、飽きないものだな(本人はアイアン1)',
+                '25分変身青ケイン': 'これはわざとじゃない "計画"だ',
+                'Teemoサポート': 'キノコがあるからワードは不要',
+                'アイバーンサポート': 'カニを一瞬で食べれるのでワードは不要',
+                'ヴェイン即ロックマン': '深夜帯にスポーン率が高く危険',
+                'ねこばばマスターイー': 'AAが二回出る つまり...',
+                '絶対に降りないyuumi': 'チャンピオンパッシブ消滅',
+                'コントロールワード': '75Gって高くね？（ブロンズ脳）',
+                '脅威おばさん': '骨身に沁みる教え（脅威をしてはいけないということ）をくれてやろう',
+                # TFT
+                '青バフグインソーバード': 'Teemo君とJhin君来たから君、もう帰っていいよ',
+                '宇宙海賊4': '4になった頃には体力ミリ',
+                'スーパーメカガレン': 'アーゴットに処刑されるガレン',
+                # mhw
+                'アステラジャーキー': '広域化口移しジャーキー',
+                'イヌ': 'た～まにゃ～',
+                '鳥になった小梅太夫': 'ハクチョーーーーーーーー（白鳥）',
+                'ハチミツ': 'ください',
+                '元気ドリンコ': 'モンスターエナg（ry',
+                '割れた卵の跡': 'それは "奴" がいた痕跡',
+                'ツィツィヤック': '卵も掘れないくそ雑魚同業者ｗｗｗ',
+                '暇ん珠【1】': 'ゲームプレイ時間持続・極意',
+                '毒瓶珠【3】': '大戦犯スロ3',
+                # ProjectWinter'
+                'トレイターチェスト': 'さっき暇んちゅさんが開けてました',
+                # MinecraftDungeons
+                'ハープクロスボウ': 'ハリケーンソナ！？',
+                # Minecraft
+                'コカトリス': '鳴き声がうるさい',
+                '鉄インゴット': '「装備せよ」',
+                '黒曜石': 'アイスバケツチャレンジ',
+                'ネザーゲート': '[検索] ネザーゲート 音 うるさい 消す',
+                'ジュークボックス': '初めて手に入ったダイヤはこれにするのがお勧め',
+                'ダイヤの鍬': '実は耕す速度が速く...ないです',
+                'サドル': '永遠の友となるだろう！ → 即乗り換え',
+                'スイートベリー': '食べるときは空を向いてよく噛んでお食べください',
+                'エンダーパール': '間違ってマグマに投げ込まないでね',
+                'ニート村人': '緑の服にピンときたら殺処分',
+                'ファントム': '睡眠不足には気をつけよう！',
+                'ウシ': 'いきなりステーキ ご来店お待ちしております',
+                'ピグリン': '貧乏人を許さない豚の鑑',
+                'クリーパー': 'なんということでしょう！ 悲劇的ビフォーアフター',
+                'テラコッタ': '近年コンクリートに建材の座を奪われつつある',
+                '鎖': '村人の首に巻きつけて空の旅へご案内',
+                '石工': 'エメラルド生産装置',
+                'アンピプテラ': '最強の移動手段',
+                'シーサーペント': 'マジキチ瞬殺ブレス',
+                'デスワーム': '良く地上に打ち上げられてる',
+                'サイクロプス': '自分の家の入口に引っかかって弓で殺される悲しい人',
+                'ドラゴンの角笛': 'ロードオブドラゴンが場に居なくても使えます',
+                '森の洋館': 'チェストの当たりがダイヤ鍬な時点でお察し',
+                '妖精': 'ｽﾀﾃﾞｯｱｳﾁｯ..ﾍﾍｯ',
+                'ムーシュルーム': '見た目がグロ注意',
+                'キノコ島': '敵が沸かない平和な場所',
+                'トライデント': '海中戦闘にはこれ一本',
+                'TNT': 'この手に限る',
+                # valheim
+                'デスキート': 'チクッ！あなたは死にました！',
+                'モデル': '死してもなお旅のお供をさせられるドラゴン',
+                '長老': '伐採ガチ勢',
+                'ヤグルス': 'メテオスォーム！',
+                '血のプティング': 'ヒルの生き血でプリンを作る狂気',
+                '上質な木': '露骨な白樺びいき',
+                'スルトリング': '水が苦手なのに沼地に住んでる謎の存在',
+            },
+            2: {
+                # real
+                '彦根城跡': '滋賀県の観光名所 別名「金亀城」',
+                '延暦寺': '滋賀県の観光名所 天台宗総本山',
+                '近江神宮': '滋賀県の観光名所 天智天皇ゆかりの地',
+                '安土城跡': '滋賀県の観光名所 あの有名な信長が城を建てた滋賀県こそ日本の中心',
+                'ウインドノーツ': '琵琶湖の空で伝説を生んだ男',
+                # LOL
+                'ウィッツエンド': 'Taricのコアビルド',
+                'アイスボーンガントレット': 'Taricのコアビルド',
+                'ヨネヤスオbot': '「対面レンジなのにgankないとかきついわ」',
+                '7/0/10 yasuo': '100秒後に1v5で負けてAFKするyasuo',
+                '青バフ': 'セトjg「ちょっとくらい、貰ってもバレへんか」',
+                # TFT
+                'ダスクリヴェン': 'サモリフの悪夢再現',
+                '★4アフェリオス': 'タレットが本体',
+                # mhw
+                '大サシミウロコ': '伝説の黒龍 VS 魚の早食い競争',
+                'キブクレペンギン': '捕まえた後はどうなるのか誰も知らない...',
+                '退散玉': '正直キミ..."臭う"よ？',
+                'クルルフェイク': '今日からキミもクルクルヤック',
+                '掻鳥の飾り羽': 'コレクター垂涎の一品',
+                'スリンガーの弾': 'これがお年弾ってかｗｗ',
+                '達人珠【1】': 'みんな大好き見切り+1',
+                '茸好珠【1】': '読み方は "たけよし" じゅ',
+                # ProjectWinter
+                '調理した人間の肉': '処理したトレイターの死体の上でキャンプファイヤー',
+                '聖書': '聖者の名のもとに狂った動物を殺戮',
+                # MinecraftDungeons
+                'レッドストーンゴーレム': 'マルファイトのパクリ',
+                # Minecraft
+                'エンチャントテーブル': '30 虫特攻Ⅳ...?',
+                'ダイヤのつるはし': '炭鉱夫の必需品',
+                '耐火のポーション': '効果時間切れた頃に大体集中力も切れて死ぬ',
+                'ネザークォーツ': '掘るだけで人生経験豊かになるパワーストーン',
+                'アイアンゴーレム': 'モデルはラピュタの巨神兵',
+                '風車型ブランチマイニング': 'teriiさんが考えたそうです',
+                '火打石': '昨夜未明、村で火災が発生しました 現場には火打石を手に走り回る不審な人物が目撃されており...',
+                'ウィザースケルトンの頭': '頭が3つ...来るぞ遊馬！',
+                'ブレイズロッド': 'ポテトに見えるともっぱらの噂',
+                'エンダーアイ': 'いのりのゆびわくらいの頻度で壊れる',
+                'ネザライト鉱石': '生成率が低すぎます',
+                '金リンゴ': 'ゾンビになっても安心',
+                'ミュルメクスの女王': '取引中に情緒不安定になって襲ってくる',
+                'ドレッドストーンの神殿': '鍵穴ブロックは破壊するもの',
+                'ゴルゴーンの神殿': '激重石化ビーム',
+                'ドラゴン整地': '新時代の整地',
+                'ニワトリ': '街の守護獣',
+                # valheim
+                'エイクスュル': 'スタミナバフ最強',
+                'スルトリングの核': 'よくわからない力を秘めた核',
+                'ロックス肉': 'おいしそう',
+                '泥まみれのゴミの山': 'ゴミの山（宝の山）',
+                'ホテル・シアン': '快適度17',
+            },
+            3: {
+                # real
+                '琵琶湖のおいしい水': '汲んで売れば大儲け',
+                '琵琶湖博物館': 'テーマは「湖と人間」',
+                'びわ湖テラス': '滋賀県の観光名所 インスタ映え',
+                '新宿の金蔵': 'また行きたいですね もう潰れちゃったかｗｗ',
+                # LOL
+                'バロンナッシャー': 'バロンとファーム、どっちが大事なの！？',
+                # TFT
+                '選ばれしものyasuo': '過ちは繰り返される',
+                # mhw
+                '金の錬金チケット': 'BBAにスパチャ',
+                '縄張り争いの跡': 'クルクルヤックは岩を持つと気が大きくなりディアブロスにも挑むらしい なお結果は...',
+                '竜のナミダ': 'ぶっ飛ばしとかやめろよ！ クルクルヤック泣いてるだろ！',
+                '撃龍槍': 'やったぜ。投稿者：変態糞狩人 (8月16日（水）07時14分22秒)',
+                '超心珠【2】': 'ペンギン愛護団体激怒',
+                # ProjectWinter
+                'サバイバー支援物資': '死刑宣告',
+                # MinecraftDungeons
+                '弱化のドラ': 'ドラドラテングダケ 相手は死ぬ',
+                # Minecraft
+                '砂漠のピラミッド': '攻略の際は1階の中央のブロックを壊すといいですよ',
+                '無限弓': '矢が無限になる原理は不明',
+                'エンダーマントラップ': 'バランスこわれる',
+                '修繕本を売る司書': 'このご時世でも就職先に困らなさそう',
+                'シーランタン': '光源の王様',
+                'ファイアドラゴンの卵': '火の中に放り込むと踊りだす変態',
+                '火竜炉': 'ブレス吐きのバイト募集してます',
+                '雷竜鋼の剣': 'まさかの落雷自傷ダメージ',
+                'コカトリスの杖': '村人処理にうってつけ',
+                '大衆酒場 BIWACO': '各種メニュー取り揃えております',
+                '高級ニワトリ': 'コンクリート製ニワトリ',
+                # valheim
+                '大骨': '骨要素は控えめ',
+                '黒い金属のくず': '謎の素材',
+            },
+            4: {
+                # real
+                '琵琶湖深層水': '飲むと不老不死になります',
+                # LOL
+                'マルファイト': '石頭トヨク言ワレル',
+                # TFT
+                '大魔王ガリオ': 'リーシンに蹴飛ばされる大魔王',
+                # mhw
+                '大霊脈玉': '「殲滅の主はまた鐘を鳴らす」',
+                '黒龍の邪眼': '抉った目玉で全身を着飾る変態',
+                '超心・整備珠【4】': '令和の炭鉱夫が追い求めたもの',
+                '匠珠Ⅱ【4】': '驚異の出現率0.10%',
+                # ProjectWinter
+                '自白剤': '▼トレイター ちょ、これはその...そう！私イエティなんd（撲殺',
+                # Minecraft
+                'エリトラ': 'ご入用の際はエンドシティのファッキンシップまで',
+                'ビーコン': 'ダイヤブロックだけで起動する猛者募集中',
+                '海底神殿': 'ガーディアンの追いAIMは最強',
+                'いきなり処刑機': '救いの手をお待ちしています',
+                'ステージ5 ライトニングドラゴン': 'サーバーメモリ絶対殺すビーム',
+                # valheim
+                '★★ Boar': '国産三元豚',
+            },
+            5: {
+                # LOL
+                '琵琶湖のアレ': '南無南無南無南無南無...',
+                'SKT T1 Faker': '「努力せずにランクで1位になった」',
+                # mhw
+                '鋼龍の尖角': 'クルクルヤック生誕のストーリー',
+                'クルルヤック希少種': 'モンハンライズで実装予定',
+                'クルルヤックの卵': '新たな伝説が生まれる...！',
+                # valheim
+            },
+        }
+
+
+    async def on_ready(self):
+        """起動時に呼ばれる"""
+        # 起動したらターミナルにログイン通知が表示される
+        print('Hello World')
+
+    async def on_message(self, message):
+
         if message.author.bot:
             # メッセージ送信者がBotだった場合は無視する
             return
