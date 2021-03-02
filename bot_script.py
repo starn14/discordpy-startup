@@ -725,7 +725,7 @@ class KuruKuruBot(discord.Client):
 
     async def on_message(self, message):
 
-        KURUKURU_CHANNEL_ID = 816251512900550716
+        KURUKURU_CHANNEL_ID = 815949568729677924
 
         if message.author.bot:
             # メッセージ送信者がBotだった場合は無視する
